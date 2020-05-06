@@ -22,6 +22,7 @@ public class Main {
 		int width = 25; // default width of board to create
 		int height = 25; // default height of board to create
 		Mode mode = Mode.LEFT;
+		boolean useStepWalker = false;
 		
 		// ======================================================
 		// ======== First, parse command-line arguments ========
@@ -40,6 +41,10 @@ public class Main {
 					mode = Mode.KEY;
 				} else if (arg.equals("-leftw")) {
 					mode = Mode.LEFT;
+				} else if (arg.equals("-randomw")) {
+					mode = Mode.RANDOM;
+				}else if (arg.equals("-stepw")) {
+					useStepWalker = true;
 				} else {
 					throw new RuntimeException("Unknown option: " + args[i]);
 				}
@@ -79,7 +84,10 @@ public class Main {
 		// Initialise the GUI and put it on the screen
 		MazeWindow.getWindowAndShow(board);
 
-		walker = new StepWalker(board, walker);
+		if (useStepWalker) {
+			// Wrap current walker inside StepWalker
+			walker = new StepWalker(board, walker);
+		}
 
 		// Now, register the key walker
 		if(walker instanceof KeyListener) {
@@ -92,14 +100,14 @@ public class Main {
 						
 		long time = System.currentTimeMillis(); // record start time
 
-		// solve the maze!
-		// walker.solve(board);
-			
-		time = System.currentTimeMillis() - time; // subtract start time
-                                                        // from current time
-		System.out.println("Maze solved by " + walker.getName() + " in " + time + "ms");
-		System.out.println("Solution has " + board.getPath().getSteps() + " steps.");
-			
+		// Solve the board automatically if StepWalker isn't used
+		if (!useStepWalker) {
+			walker.solve(board);
+
+			time = System.currentTimeMillis() - time ; // subtract start time from current time
+			System.out.println("Maze solved by " + walker.getName() + " in " + time + "ms");
+			System.out.println("Solution has " + board.getPath().getSteps() + " steps.");
+		}
 	}	
 }
 

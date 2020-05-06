@@ -8,18 +8,29 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 /**
- * An any implementation of the key walker, which you need to complete
- * following the notes.
+ * An implementation of <code>Walker</code> that allows user
+ * to control another <code>Walker</code>.
  */
 public class StepWalker extends Walker implements KeyListener {
 
-    private Board board;
-    private Walker walker = new LeftWalker();
+    private final Board board;
+    private final Walker walker;
+    private int stepKeyCode;
 
     public StepWalker(Board board, Walker walker) {
-        super("Key Walker");
+        super(String.format("Step Walker (%s)", walker.getName()));
         this.board = board;
         this.walker = walker;
+        this.stepKeyCode = KeyEvent.VK_Q;
+    }
+
+    /**
+     * Create new <code>StepWalker</code>
+     * @param keyCode   a virtual key code (VK_*) defined in <code>KeyEvent</code>
+     */
+    public StepWalker(Board board, Walker walker, int keyCode) {
+        this(board, walker);
+        stepKeyCode = keyCode;
     }
 
     protected Direction move(View v) {
@@ -27,16 +38,14 @@ public class StepWalker extends Walker implements KeyListener {
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
+    public void keyTyped(KeyEvent e) { }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_Q:
+        if (e.getKeyCode() == stepKeyCode) {
+            if (!board.isSolved()) {
                 walker.step(board);
-                break;
+            }
         }
     }
 
