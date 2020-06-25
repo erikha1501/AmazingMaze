@@ -45,7 +45,7 @@ public class Main {
                     mode = Mode.LEFT;
                 } else if (arg.equals("-randomw")) {
                     mode = Mode.RANDOM;
-                } else if (arg.equals("-smart")) {
+                } else if (arg.equals("-smartw")) {
                     mode = Mode.SMART;
                 } else if (arg.equals("-stepw")) {
                     useStepWalker = true;

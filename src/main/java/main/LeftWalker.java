@@ -16,7 +16,7 @@ public class LeftWalker extends Walker {
      * <p>
      * Used in <code>visitedSquareLookup</code>
      */
-    private static class Coord {
+    protected static class Coord {
         private final int x;
         private final int y;
 
@@ -48,13 +48,25 @@ public class LeftWalker extends Walker {
         }
     }
 
+    protected static class SquareInfo {
+        public int exitInfo;
+
+        public SquareInfo(int exitInfo) {
+            this.exitInfo = exitInfo;
+        }
+
+        public void updateExitInfo(int usedDirection) {
+            exitInfo = setUsedExitDirection(exitInfo, usedDirection);
+        }
+    }
+
     /**
      * An array lookup which maps integer directions into <code>Direction</code>s.
      * <p>
      * Internally <code>LeftWalker</code> uses integers for directions. This makes
      * calculations (find left, right) easier.
      */
-    private static final Direction[] intToDirectionMapping =
+    protected static final Direction[] intToDirectionMapping =
             {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
 
     /**
@@ -64,43 +76,53 @@ public class LeftWalker extends Walker {
      * <p>
      * Value: an <code>Integer</code> storing previously used exits
      */
-    private final HashMap<Coord, Integer> visitedSquareLookup = new HashMap<Coord, Integer>();
+    protected final HashMap<Coord, SquareInfo> visitedSquareLookup = new HashMap<Coord, SquareInfo>();
 
-    private boolean isFollowingLeft = false;
-    private int facingDirection = 0;
+    protected boolean isFollowingLeft = false;
+    protected int facingDirection = 0;
 
-    private int posX = 0;
-    private int posY = 0;
+    protected int posX = 0;
+    protected int posY = 0;
 
     public LeftWalker() {
         super("Left Walker");
     }
 
+    protected LeftWalker(String name) { super(name); }
+
+    @Override
     protected Direction move(View v) {
 
+        Coord coord = new Coord(posX, posY);
+
+        // Get info about current square.
+        // Prepare a new one if this is the first entrance.
+        SquareInfo squareInfo = visitedSquareLookup.get(coord);
+
+        if (squareInfo == null) {
+            squareInfo = new SquareInfo(0);
+            visitedSquareLookup.put(coord, squareInfo);
+        }
+
+        // Begin finding next move.
         if (!isFollowingLeft) {
             // Try to find a left wall to follow.
             if (locateLeftWall(v)) {
                 isFollowingLeft = true;
-            } else {
-                // Take a step NORTH if no wall found.
-                return Direction.NORTH;
             }
         }
 
-        Coord coord = new Coord(posX, posY);
-
-        // Find info about past entry of the current square.
-        int squareExitInfo = visitedSquareLookup.getOrDefault(coord, 0);
-        int nextMoveDirection = findNextMove(v, squareExitInfo);
+        int nextMoveDirection = findNextMove(v, squareInfo.exitInfo);
 
         if (nextMoveDirection < 0) {
             System.out.println("Cannot find next move");
             return null;
         } else {
+            // Change facing direction towards the open path.
+            facingDirection = nextMoveDirection;
+
             // Before moving to the next square, mark the current location as visited.
-            squareExitInfo = setUsedExitDirection(squareExitInfo, nextMoveDirection);
-            visitedSquareLookup.put(coord, squareExitInfo);
+            squareInfo.updateExitInfo(nextMoveDirection);
 
             // Update current pos.
             updatePos(nextMoveDirection);
@@ -111,10 +133,11 @@ public class LeftWalker extends Walker {
 
     /**
      * Try to find a left wall. Rotates 90 degrees clock wise until a wall is found.
-     * @param   v    a <code>View</code> into current maze
-     * @return       a boolean indicating whether a left wall found
+     *
+     * @param v a <code>View</code> into current maze
+     * @return a boolean indicating whether a left wall found
      */
-    private boolean locateLeftWall(View v) {
+    protected boolean locateLeftWall(View v) {
 
         int initialProbingDirection = leftOf(facingDirection);
         int probingDirection = initialProbingDirection;
@@ -141,13 +164,14 @@ public class LeftWalker extends Walker {
     /**
      * Start looking for an open path to the left.
      * Turn clockwise until found one.
-     * @param v                 a <code>View</code> into current maze
-     * @param squareExitInfo    used exits
-     * @return                  next possible direction, -1 if can't find any
+     *
+     * @param v              a <code>View</code> into current maze
+     * @param squareExitInfo used exits
+     * @return next possible direction, -1 if can't find any
      */
-    private int findNextMove(View v, int squareExitInfo) {
+    protected int findNextMove(View v, int squareExitInfo) {
 
-        int initialProbingDirection = leftOf(facingDirection);
+        int initialProbingDirection = isFollowingLeft ? leftOf(facingDirection) : facingDirection;
         int probingDirection = initialProbingDirection;
 
         while (true) {
@@ -162,8 +186,6 @@ public class LeftWalker extends Walker {
                     isFollowingLeft = false;
                 } else {
 
-                    // Change facing direction towards the open path.
-                    facingDirection = probingDirection;
                     return probingDirection;
                 }
             }
@@ -178,7 +200,7 @@ public class LeftWalker extends Walker {
         }
     }
 
-    private void updatePos(int direction) {
+    protected void updatePos(int direction) {
         switch (direction) {
             case 0:
                 posY++;
@@ -197,33 +219,38 @@ public class LeftWalker extends Walker {
 
     /**
      * A helper method checking if <code>direction</code> can be taken.
-     * @param v                 a <code>View</code> into current maze
-     * @param direction         direction to be checked
-     * @return                  whether <code>direction</code> can be taken
+     *
+     * @param v         a <code>View</code> into current maze
+     * @param direction direction to be checked
+     * @return whether <code>direction</code> can be taken
      */
-    private boolean mayMove(View v, int direction) {
+    protected boolean mayMove(View v, int direction) {
         return v.mayMove(getDirection(direction));
     }
 
-    private int leftOf(int currentDirection) {
+    protected static int leftOf(int currentDirection) {
         return (currentDirection + 3) % 4;
     }
 
-    private int rightOf(int currentDirection) {
+    protected static int rightOf(int currentDirection) {
         return (currentDirection + 1) % 4;
     }
 
-    private boolean exitDirectionUsed(int squareExitInfo, int direction) {
+    protected static int oppositeOf(int direction) {
+        return (direction + 2) % 4;
+    }
+
+    protected static boolean exitDirectionUsed(int squareExitInfo, int direction) {
         // Basically check if bit representing 'direction' is set.
         return (squareExitInfo & (1 << direction)) != 0;
     }
 
-    private int setUsedExitDirection(int squareExitInfo, int direction) {
+    protected static int setUsedExitDirection(int squareExitInfo, int direction) {
         // Set bit representing 'direction'.
         return squareExitInfo | (1 << direction);
     }
 
-    private Direction getDirection(int direction) {
+    protected static Direction getDirection(int direction) {
         return intToDirectionMapping[direction];
     }
 }
