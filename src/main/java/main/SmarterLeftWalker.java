@@ -94,6 +94,4 @@ public class SmarterLeftWalker extends LeftWalker {
             return null;
         }
     }
-
-
 }

@@ -11,7 +11,8 @@ import java.awt.event.KeyListener;
  * An implementation of <code>Walker</code> that allows user
  * to control another <code>Walker</code>.
  */
-public class StepWalker extends Walker implements KeyListener {
+public class StepWalker extends Walker
+                        implements KeyListener {
 
     private final Board board;
     private final Walker walker;

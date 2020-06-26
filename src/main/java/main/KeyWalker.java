@@ -27,9 +27,6 @@ public class KeyWalker extends Walker implements KeyListener {
     }
 
     @Override
-    public void keyTyped(KeyEvent e) { }
-
-    @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_UP:
@@ -50,6 +47,9 @@ public class KeyWalker extends Walker implements KeyListener {
                 break;
         }
     }
+
+    @Override
+    public void keyTyped(KeyEvent e) { }
 
     @Override
     public void keyReleased(KeyEvent e) {
