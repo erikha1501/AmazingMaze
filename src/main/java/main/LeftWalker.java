@@ -48,6 +48,11 @@ public class LeftWalker extends Walker {
         }
     }
 
+    /**
+     * Store exit info for a square (i.e. which directions had been used before).
+     * <p>
+     * The lower 4 bits of <code>exitInfo</code> holds this information.
+     */
     protected static class SquareInfo {
         public int exitInfo;
 

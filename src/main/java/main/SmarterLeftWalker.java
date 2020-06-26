@@ -12,6 +12,9 @@ import java.util.Stack;
  */
 public class SmarterLeftWalker extends LeftWalker {
 
+    /**
+     * Store exact decision this walker made upon encountered a square in the past.
+     */
     private static class SquareSnapshot {
         public final int takenDirection;
         public final int facingDirection;
@@ -22,6 +25,9 @@ public class SmarterLeftWalker extends LeftWalker {
         }
     }
 
+    /**
+     * Store all moves this walker made.
+     */
     private final Stack<SquareSnapshot> visitedSquareHistory = new Stack<SquareSnapshot>();
 
     public SmarterLeftWalker() {
